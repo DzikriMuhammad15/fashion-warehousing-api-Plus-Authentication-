@@ -17,6 +17,7 @@ from config.database import datas
 from bson import ObjectId
 from fastapi.encoders import jsonable_encoder
 from starlette.middleware.base import BaseHTTPMiddleware
+import requests, json
 
 
 
@@ -47,7 +48,19 @@ class MarkUp(BaseModel):
 
 class User(BaseModel):
     username: str
-    password: str
+    password: str = ""
+
+class Customization(BaseModel):
+    productId: int
+    specialInstructions: str
+    font: str
+    color: str
+    descriptions: str
+    size: str
+    imageUrl: str
+
+
+
 
 
 
@@ -123,6 +136,35 @@ def get_current_user(token: str = Depends(oauth2_scheme)):
     except PyJWTError:
         raise HTTPException(status_code=401, detail="Invalid token")
 
+
+
+url = 'http://localhost:8004/'
+
+def create_user_external(username, password):
+    headers = {'Authorization': ''}
+    params = {
+        "firstname": "APIDzikri",
+        "lastname": "APIDzikri",
+        "phonenumber": "0812345",
+        "address": "APIDzikri",
+        "email": f"{username}@gmail.com",
+        "password": password,
+        "username": username,
+        "role": "admin"
+    }
+
+    url_endpoint = url + 'authentications/register'
+    res = requests.post(url_endpoint, params=params, headers=headers).json()
+    return res
+
+
+
+def get_token_eksternal(username, password):
+    token_url = url+'authentications/login'
+    token_response = requests.post(token_url, data={'username': username, 'password': password})
+    token = token_response.json().get('access_token')
+    return token
+
 @app.post("/token")
 def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
 
@@ -150,9 +192,12 @@ def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
     # Jika informasi pengguna benar, buat token JWT
 
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    tokenEksternal = get_token_eksternal(form_data.username, form_data.password)
     access_token = create_access_token(
-        data={"sub": form_data.username}, expires_delta=access_token_expires
+        data={"sub": form_data.username, "tokenEksternal": tokenEksternal}, expires_delta=access_token_expires
     )
+
+
     return {"access_token": access_token, "token_type": "bearer"}
 
 
@@ -167,32 +212,42 @@ async def createAdmin(form_data: OAuth2PasswordRequestForm = Depends()):
     # TODO JIKA USERNAME TELAH TERDAFTAR, RAISE HTTP EXCEPTION (USERNAME HAS ALREADY BEEN TAKEN)
     if(foundUsername):
         raise HTTPException(
-		status_code=404, detail=f'username has already been taken'
+		status_code=400, detail=f'username has already been taken'
 	)
     else:
         # TODO JIKA USERNAME BELUM TERDAFTAR, CEK PASSWORD  
         if(len(form_data.password) < 6):
             # TODO JIKA PASSWORD KURANG DARI 6 KARAKTER, RAISE HTTP EXCEPTION (PASSWORD MUST BE 6 CHARACTERS OR MORE)
             raise HTTPException(
-		    status_code=404, detail=f'password must be 6 characters or more'
+		    status_code=400, detail=f'password must be 6 characters or more'
 	    )
         else:
-            password = bcrypt.hashpw(form_data.password.encode('utf-8'), bcrypt.gensalt())
-            password_string = password.decode('utf-8')
-            user_dict = {"username": form_data.username, "password": password_string, "role": "admin"}
-            # TODO JIKA SUDAH SESUAI, TULISKAN KE DALAM JSON
-            user['users'].append(user_dict)
-        #    save ke database
-            filterCriteria = {"_id": ObjectId(user['_id'])}
-            updateQuery = {
-                "$set": {
-                    "users": user["users"]
+            # ! JANGAN LUPA KITA BUATKAN AKUN JUGA DI API LUAR
+            respon = create_user_external(form_data.username, form_data.password)
+
+            if(respon):
+                password = bcrypt.hashpw(form_data.password.encode('utf-8'), bcrypt.gensalt())
+                password_string = password.decode('utf-8')
+                user_dict = {"username": form_data.username, "password": password_string, "role": "admin"}
+                # TODO JIKA SUDAH SESUAI, TULISKAN KE DALAM JSON
+                user['users'].append(user_dict)
+            #    save ke database
+                filterCriteria = {"_id": ObjectId(user['_id'])}
+                updateQuery = {
+                    "$set": {
+                        "users": user["users"]
+                    }
                 }
-            }
-            users.update_one(filterCriteria, updateQuery)
-            # with open(json_filename_user, "w") as write_file: 
-            #     json.dump(user, write_file)
-            return {"message": "Data added sucessfully"}
+                users.update_one(filterCriteria, updateQuery)
+
+
+                # with open(json_filename_user, "w") as write_file: 
+                #     json.dump(user, write_file)
+                return {"message": "Data added sucessfully"}
+            else:
+                raise HTTPException(
+		status_code=400, detail=f'user creation failed'
+	)
 
 
 
@@ -217,22 +272,29 @@ async def createUser(form_data: OAuth2PasswordRequestForm = Depends()):
 		    status_code=404, detail=f'password must be 6 characters or more'
 	    )
         else:
-            password = bcrypt.hashpw(form_data.password.encode('utf-8'), bcrypt.gensalt())
-            password_string = password.decode('utf-8')
-            user_dict = {"username": form_data.username, "password": password_string, "role": "user"}
-            # TODO JIKA SUDAH SESUAI, TULISKAN KE DALAM JSON
-            user['users'].append(user_dict)
-        #    save ke database
-            filterCriteria = {"_id": ObjectId(user['_id'])}
-            updateQuery = {
-                "$set": {
-                    "users": user["users"]
+            # ! JANGAN LUPA KITA BUATKAN AKUN JUGA DI API LUAR
+            respon = create_user_external(form_data.username, form_data.password)
+            if(respon):
+                password = bcrypt.hashpw(form_data.password.encode('utf-8'), bcrypt.gensalt())
+                password_string = password.decode('utf-8')
+                user_dict = {"username": form_data.username, "password": password_string, "role": "user"}
+                # TODO JIKA SUDAH SESUAI, TULISKAN KE DALAM JSON
+                user['users'].append(user_dict)
+            #    save ke database
+                filterCriteria = {"_id": ObjectId(user['_id'])}
+                updateQuery = {
+                    "$set": {
+                        "users": user["users"]
+                    }
                 }
-            }
-            users.update_one(filterCriteria, updateQuery)
-            # with open(json_filename_user, "w") as write_file: 
-            #     json.dump(user, write_file)
-            return {"message": "Data added sucessfully"}
+                users.update_one(filterCriteria, updateQuery)
+                # with open(json_filename_user, "w") as write_file: 
+                #     json.dump(user, write_file)
+                return {"message": "Data added sucessfully"}
+            else:
+                raise HTTPException(
+		status_code=400, detail=f'user creation failed'
+	)
 
 
 
@@ -999,6 +1061,215 @@ async def updateStock(newRow: ProductStock, token: str = Depends(oauth2_scheme))
         raise HTTPException(
             status_code=404, detail=f'data not found'
         )
+    except PyJWTError: 
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid token",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+
+# ! FETCH API LUAR
+def decode_to_eksternal_token(token: str = Depends(oauth2_scheme)):
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        externalToken: str = payload.get("tokenEksternal")
+        if externalToken is None:
+            raise HTTPException(status_code=401, detail="Invalid authentication credentials")
+        return externalToken
+    except PyJWTError:
+        raise HTTPException(status_code=401, detail="Invalid token")
+
+def decode_to_eksternal_username(token: str = Depends(oauth2_scheme)):
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        username: str = payload.get("sub")
+        if username is None:
+            raise HTTPException(status_code=401, detail="Invalid authentication credentials")
+        return username
+    except PyJWTError:
+        raise HTTPException(status_code=401, detail="Invalid token")
+
+# utils
+def usernameToId(username, eksternalToken):
+    # TODO get all user dulu
+    headers = {'Authorization': f'Bearer {eksternalToken}'}
+    users = requests.get(url+'users', headers=headers).json()
+    # TODO bakalan dapet array of array
+    # TODO laukan iterasi pada array yang luar
+    for element in users:
+        # TODO lakukan pengecekan jika index ke 6 sama dengan username, return index ke 0 
+        if(element[6] == username):
+            return element[0]
+    return -1
+
+
+# Menggunakan token untuk mengakses endpoint tertentu
+
+
+
+def createCustomizationRequests(specialInstructions, username, price, stock, font, color, size, productType, descriptions, imageUrl, eksternalToken ):
+    userId = usernameToId(username, eksternalToken)
+    if(userId != -1):
+        # ! REQUEST UNTUK MEMBUAT PRODUCT
+        headers= {'Authorization': f'Bearer {eksternalToken}'}
+        data1 = {
+            "description": descriptions,
+            "price":price,
+            "stock": stock,
+            "default_font": font,
+            "default_color":color,
+            "size": size,
+            "productType": productType,
+            "imageurl": imageUrl
+        }
+        urlEndpoint1 = url+"products"
+        res1 = requests.post(urlEndpoint1, params=data1, headers=headers).json()
+
+        # ! AMBIL ID PRODUCT YANG BARU DIINPUT dengan get all product
+        urlEndpoint2 = url+"products"
+        res2 = requests.get(urlEndpoint2, headers=headers).json()
+        idProductLuar = res2[len(res2)-1][0]
+
+
+        # ! REQUEST UNTUK MEMBUAT CUSTOMIZATION REQ
+        data = {
+            "userID": userId,
+            "productID": idProductLuar,
+            "specialInstructions": specialInstructions
+        }
+        urlEndpoint = url+"customizationRequests"
+        res = requests.post(urlEndpoint, params=data, headers=headers).json()
+
+        # ! AMBIL JUGA ID DARI CUSTOMIZATIONNYA KARENA KITA BUTUH
+        urlEndpoint3 = url+"customizationRequests"
+        res3 = requests.get(urlEndpoint3, headers=headers).json()
+        idCustomization = res3[len(res3)-1][0]
+
+        return {
+            "res1": res1,
+            "res2": res2,
+            "res":res,
+            "idProductLuar":idProductLuar,
+            "idCustomization": idCustomization
+        }
+    else:
+        raise HTTPException(
+		    status_code=400, detail=f'not authenticated'
+	    )
+
+def getRequestByCustomerId(externalToken, customerId):
+    url = 'http://localhost:8004/'
+    headers = {'Authorization': f'Bearer {externalToken}'}
+    hasil = []
+    res = requests.get(url+f'customizationRequests/{customerId}', headers=headers).json()[0]
+    if(len(res) > 0):
+        for element in res:
+            product = requests.get(url+f'products/{element[2]}', headers=headers).json()[0]
+            inst = {
+                "customizationId": element[0],
+                "productId": element[2],
+                "specialInstructions": element[3],
+                "font": product[4],
+                "color": product[5],
+                "descriptions": product[1],
+                "price": product[2],
+                "stock": product[3],
+                "size": product[6],
+                "productType": product[7]
+            }
+            hasil.append(inst)
+        return hasil
+    else:
+        return {"messages": "you don't have any fashion customization request yet"}
+
+def deleteCustomizationRequests(idCustomization, eksternalToken):
+    headers = {'Authorization': f'Bearer {eksternalToken}'}
+    urlEndpoint = url+"customizationRequests/"+str(idCustomization)
+    # ! hapus juga productnya pada external api
+    urlEndpointGet = url+"customizationRequests"
+    arrRequest = requests.get(urlEndpointGet, headers=headers).json()
+    idProduk = -1
+    for element in arrRequest:
+        if(element[0] == idCustomization):
+            idProduk = element[2]
+            break
+    urlEndpointDelete = url+f"products/{idProduk}"
+    res = requests.delete(urlEndpoint, headers=headers).json()
+    res1 = requests.delete(urlEndpointDelete, headers=headers)
+    return res
+
+@app.post('/customization')
+async def createCustomization(rowBaru: Customization, token: str = Depends(oauth2_scheme)):
+    try:
+        newRow = rowBaru.dict()
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        username: str = payload.get("sub")
+        externalToken: str = payload.get("tokenEksternal")
+        if username is None:
+            raise HTTPException(
+                status_code=401,
+                detail="Invalid authentication credentials",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+        #  todo ambil dulu si product yang sesuai dengan productId
+        productDalam = await getProductById(newRow['productId'], token=token)
+        # todo ambil juga row dari productStocknya
+        productStockDalam = await getProductStockbyIdProductAndUkuran(idProduct=newRow['productId'], ukuran=newRow['size'], token=token)
+        # todo ambil juga kategorinya
+        kategoriDalam = await getcategoryById(productDalam['categoryId'], token=token)
+        # todo panggil fungsi yang telah dibuat untuk memanggil api luar dengan data-data yang dibutuhkan berada di dalam product
+        res = createCustomizationRequests(newRow["specialInstructions"], username, productDalam['price'], productStockDalam['stock'], newRow['font'], newRow['color'], newRow['size'], kategoriDalam['categoryName'], newRow['descriptions'], newRow['imageUrl'], eksternalToken=externalToken)
+        # todo kembalikan bahwa customization request berhasil dibuat
+        return "customization request has been added sucessfully"
+    except PyJWTError: 
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid token",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+
+@app.get('/Mycustomization')
+async def getMyCustomization(token: str = Depends(oauth2_scheme)):
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        username: str = payload.get("sub")
+        externalToken: str = payload.get("tokenEksternal")
+        if username is None:
+            raise HTTPException(
+                status_code=401,
+                detail="Invalid authentication credentials",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+        # todo panggil dulu fungsi untuk mengubah username menjadi userId luar
+        userIdLuar = usernameToId(username, externalToken)
+        # todo lakukan fetch ke api luar get request by id
+        hasil = getRequestByCustomerId(externalToken, userIdLuar)
+        # todo return hasilnya
+        return hasil
+    except PyJWTError: 
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid token",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+@app.delete('/customization')
+async def DeleteMyCustomization(idCustomization : int,token: str = Depends(oauth2_scheme)):
+    # todo panggil delete customization Request
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        username: str = payload.get("sub")
+        externalToken: str = payload.get("tokenEksternal")
+        if username is None:
+            raise HTTPException(
+                status_code=401,
+                detail="Invalid authentication credentials",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+        res = deleteCustomizationRequests(idCustomization, externalToken)
+        return "customization request has been deleted sucessfully"
     except PyJWTError: 
         raise HTTPException(
             status_code=401,
