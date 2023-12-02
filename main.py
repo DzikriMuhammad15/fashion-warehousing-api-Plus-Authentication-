@@ -2,8 +2,10 @@ import datetime
 from pstats import Stats
 import statistics
 from typing import Annotated
-from fastapi import Depends, FastAPI, HTTPException, Request, applications
+from fastapi import Cookie, Depends, FastAPI, HTTPException, Request, Response, applications
 import json
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 from fastapi import FastAPI, Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
@@ -18,6 +20,8 @@ from bson import ObjectId
 from fastapi.encoders import jsonable_encoder
 from starlette.middleware.base import BaseHTTPMiddleware
 import requests, json
+
+templates = Jinja2Templates(directory="templates")
 
 
 
@@ -63,9 +67,9 @@ class Customization(BaseModel):
 
 
 
-
 # ! FAST API
 app = FastAPI()
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
 # ! READ FILE (MIDDLEWARE)
 @app.middleware("http")
@@ -165,48 +169,53 @@ def get_token_eksternal(username, password):
     token = token_response.json().get('access_token')
     return token
 
-@app.post("/token")
-def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
 
+@app.post("/token")
+def login_for_access_token(response: Response, newUsers: User):
     # TODO Melakukan pemerikasaan terhadap username (apakah terdapat dalam database)
     # melakukan pencarian terhadap username
+    newUser = newUsers.dict()
     foundUsername = False
     for pengguna in user['users']:
-        if(pengguna['username'] == form_data.username):
+        if(pengguna['username'] == newUser['username']):
             foundUsername = True
             currentUser = pengguna
             break
     # TODO jika email tidak ditemukan, raise http exception ("username not found")
+    print("masuk1")
     if(not foundUsername):
         raise HTTPException(
-		status_code=404, detail=f'user not found'
-	)
+        status_code=404, detail=f'user not found'
+    )
 
     # TODO melakukan pemeriksaan apakah passwordnya benar atau salah 
     # TODO jika passwordnya salah, raise http exception ("incorrect password")
-    if not bcrypt.checkpw(form_data.password.encode('utf-8'), currentUser['password'].encode('utf-8')):
+    print("masuk2")
+    if not bcrypt.checkpw(newUser['password'].encode('utf-8'), currentUser['password'].encode('utf-8')):
         raise HTTPException(
-		status_code=401, detail=f'incorrect password'
-	)
+        status_code=401, detail=f'incorrect password'
+    )
     # TODO jika benar, tambahkan data user, kemudian kembalikan berupa jwt
     # Jika informasi pengguna benar, buat token JWT
-
+    print("masuk3")
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    tokenEksternal = get_token_eksternal(form_data.username, form_data.password)
+    print("masuk4")
+    tokenEksternal = get_token_eksternal(newUser['username'], newUser['password'])
+    print("masuk5")
     access_token = create_access_token(
-        data={"sub": form_data.username, "tokenEksternal": tokenEksternal}, expires_delta=access_token_expires
+        data={"sub": newUser['username'], "tokenEksternal": tokenEksternal}, expires_delta=access_token_expires
     )
-
-
+    response.set_cookie(key="access_token", value=f"{access_token}", expires=ACCESS_TOKEN_EXPIRE_MINUTES * 60)
+    print("masuk6")
     return {"access_token": access_token, "token_type": "bearer"}
 
 
 @app.post("/createUAdmin")
-async def createAdmin(form_data: OAuth2PasswordRequestForm = Depends()):
+async def createAdmin(newUser: User):
     # TODO LAKUKAN PENGECEKAN TERHADAP USERNAME
     foundUsername = False
     for admin in user['users']:
-        if(admin['username'] == form_data.username):
+        if(admin['username'] == newUser['username']):
             foundUsername = True
             break
     # TODO JIKA USERNAME TELAH TERDAFTAR, RAISE HTTP EXCEPTION (USERNAME HAS ALREADY BEEN TAKEN)
@@ -216,19 +225,19 @@ async def createAdmin(form_data: OAuth2PasswordRequestForm = Depends()):
 	)
     else:
         # TODO JIKA USERNAME BELUM TERDAFTAR, CEK PASSWORD  
-        if(len(form_data.password) < 6):
+        if(len(newUser['password']) < 6):
             # TODO JIKA PASSWORD KURANG DARI 6 KARAKTER, RAISE HTTP EXCEPTION (PASSWORD MUST BE 6 CHARACTERS OR MORE)
             raise HTTPException(
 		    status_code=400, detail=f'password must be 6 characters or more'
 	    )
         else:
             # ! JANGAN LUPA KITA BUATKAN AKUN JUGA DI API LUAR
-            respon = create_user_external(form_data.username, form_data.password)
+            respon = create_user_external(newUser['username'], newUser['password'])
 
             if(respon):
-                password = bcrypt.hashpw(form_data.password.encode('utf-8'), bcrypt.gensalt())
+                password = bcrypt.hashpw(newUser['password'].encode('utf-8'), bcrypt.gensalt())
                 password_string = password.decode('utf-8')
-                user_dict = {"username": form_data.username, "password": password_string, "role": "admin"}
+                user_dict = {"username": newUser['username'], "password": password_string, "role": "admin"}
                 # TODO JIKA SUDAH SESUAI, TULISKAN KE DALAM JSON
                 user['users'].append(user_dict)
             #    save ke database
@@ -252,11 +261,12 @@ async def createAdmin(form_data: OAuth2PasswordRequestForm = Depends()):
 
 
 @app.post("/createUser")
-async def createUser(form_data: OAuth2PasswordRequestForm = Depends()):
+async def createUser(newUsers: User):
     # TODO LAKUKAN PENGECEKAN TERHADAP USERNAME
     foundUsername = False
+    newUser = newUsers.dict()
     for pengguna in user['users']:
-        if(pengguna['username'] == form_data.username):
+        if(pengguna['username'] == newUser['username']):
             foundUsername = True
             break
     # TODO JIKA USERNAME TELAH TERDAFTAR, RAISE HTTP EXCEPTION (USERNAME HAS ALREADY BEEN TAKEN)
@@ -266,18 +276,18 @@ async def createUser(form_data: OAuth2PasswordRequestForm = Depends()):
 	)
     else:
         # TODO JIKA USERNAME BELUM TERDAFTAR, CEK PASSWORD  
-        if(len(form_data.password) < 6):
+        if(len(newUser['password']) < 6):
             # TODO JIKA PASSWORD KURANG DARI 6 KARAKTER, RAISE HTTP EXCEPTION (PASSWORD MUST BE 6 CHARACTERS OR MORE)
             raise HTTPException(
 		    status_code=404, detail=f'password must be 6 characters or more'
 	    )
         else:
             # ! JANGAN LUPA KITA BUATKAN AKUN JUGA DI API LUAR
-            respon = create_user_external(form_data.username, form_data.password)
+            respon = create_user_external(newUser['username'], newUser['password'])
             if(respon):
-                password = bcrypt.hashpw(form_data.password.encode('utf-8'), bcrypt.gensalt())
+                password = bcrypt.hashpw(newUser['password'].encode('utf-8'), bcrypt.gensalt())
                 password_string = password.decode('utf-8')
-                user_dict = {"username": form_data.username, "password": password_string, "role": "user"}
+                user_dict = {"username": newUser['username'], "password": password_string, "role": "user"}
                 # TODO JIKA SUDAH SESUAI, TULISKAN KE DALAM JSON
                 user['users'].append(user_dict)
             #    save ke database
@@ -1276,3 +1286,22 @@ async def DeleteMyCustomization(idCustomization : int,token: str = Depends(oauth
             detail="Invalid token",
             headers={"WWW-Authenticate": "Bearer"},
         )
+    
+@app.get("/")
+async def login(request: Request):
+    context = {"request": request}
+    return templates.TemplateResponse("login.html", context)
+
+@app.get("/dashboard")
+async def dashboard(request: Request, access_token: str = Cookie(default=None)):
+    try: 
+        if(access_token is None):
+            raise HTTPException(status_code=401, detail="Unauthorized")
+        print(access_token)
+        payload = jwt.decode(access_token, SECRET_KEY, algorithms=[ALGORITHM])
+        username: str = payload.get("sub")
+        data = await getAllProduct(token=access_token)
+        context = {"request": request, "username": username, "data": data}
+        return templates.TemplateResponse("dashboard.html", context)
+    except PyJWTError:
+        raise HTTPException(status_code=401, detail="Invalid token")

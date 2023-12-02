@@ -85,13 +85,6 @@ def deleteCustomizationRequests(idCustomization):
 
 
 
-def get_psychologist_list():
-    headers = {'Authorization': f'Bearer {get_token()}'}
-    psychologist = requests.get(url+'users', headers=headers)
-    return psychologist.json()
-
-
-
 
 # for psy in arr:
 #     print(psy)
