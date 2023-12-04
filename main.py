@@ -201,6 +201,7 @@ def login_for_access_token(response: Response, newUsers: User):
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     print("masuk4")
     tokenEksternal = get_token_eksternal(newUser['username'], newUser['password'])
+    print(tokenEksternal)
     print("masuk5")
     access_token = create_access_token(
         data={"sub": newUser['username'], "tokenEksternal": tokenEksternal}, expires_delta=access_token_expires
@@ -1116,8 +1117,6 @@ def usernameToId(username, eksternalToken):
 
 # Menggunakan token untuk mengakses endpoint tertentu
 
-
-
 def createCustomizationRequests(specialInstructions, username, price, stock, font, color, size, productType, descriptions, imageUrl, eksternalToken ):
     userId = usernameToId(username, eksternalToken)
     if(userId != -1):
@@ -1148,6 +1147,7 @@ def createCustomizationRequests(specialInstructions, username, price, stock, fon
             "productID": idProductLuar,
             "specialInstructions": specialInstructions
         }
+        print(data)
         urlEndpoint = url+"customizationRequests"
         res = requests.post(urlEndpoint, params=data, headers=headers).json()
 
@@ -1155,7 +1155,7 @@ def createCustomizationRequests(specialInstructions, username, price, stock, fon
         urlEndpoint3 = url+"customizationRequests"
         res3 = requests.get(urlEndpoint3, headers=headers).json()
         idCustomization = res3[len(res3)-1][0]
-
+        
         return {
             "res1": res1,
             "res2": res2,
@@ -1213,6 +1213,7 @@ def deleteCustomizationRequests(idCustomization, eksternalToken):
 async def createCustomization(rowBaru: Customization, token: str = Depends(oauth2_scheme)):
     try:
         newRow = rowBaru.dict()
+        print(newRow)
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         username: str = payload.get("sub")
         externalToken: str = payload.get("tokenEksternal")
@@ -1252,6 +1253,7 @@ async def getMyCustomization(token: str = Depends(oauth2_scheme)):
                 detail="Invalid authentication credentials",
                 headers={"WWW-Authenticate": "Bearer"},
             )
+        print("username")
         # todo panggil dulu fungsi untuk mengubah username menjadi userId luar
         userIdLuar = usernameToId(username, externalToken)
         # todo lakukan fetch ke api luar get request by id
@@ -1297,7 +1299,6 @@ async def dashboard(request: Request, access_token: str = Cookie(default=None)):
     try: 
         if(access_token is None):
             raise HTTPException(status_code=401, detail="Unauthorized")
-        print(access_token)
         payload = jwt.decode(access_token, SECRET_KEY, algorithms=[ALGORITHM])
         username: str = payload.get("sub")
         data = await getAllProduct(token=access_token)
@@ -1305,3 +1306,54 @@ async def dashboard(request: Request, access_token: str = Cookie(default=None)):
         return templates.TemplateResponse("dashboard.html", context)
     except PyJWTError:
         raise HTTPException(status_code=401, detail="Invalid token")
+    
+@app.get("/categoryDashboard")
+async def categorydashboard(request: Request, access_token: str = Cookie(default=None)):
+    try: 
+        if(access_token is None):
+            raise HTTPException(status_code=401, detail="Unauthorized")
+        payload = jwt.decode(access_token, SECRET_KEY, algorithms=[ALGORITHM])
+        username: str = payload.get("sub")
+        data = await getAllcategory(token=access_token)
+        context = {"request": request, "username": username, "data": data}
+        return templates.TemplateResponse("categoryDashboard.html", context)
+    except PyJWTError:
+        raise HTTPException(status_code=401, detail="Invalid token")
+
+
+@app.get("/stockDashboard")
+async def stockdashboard(request: Request, access_token: str = Cookie(default=None)):
+    try: 
+        if(access_token is None):
+            raise HTTPException(status_code=401, detail="Unauthorized")
+        payload = jwt.decode(access_token, SECRET_KEY, algorithms=[ALGORITHM])
+        username: str = payload.get("sub")
+        dataStock = await getAllProductStock(token=access_token)
+        data = await getAllProduct(token=access_token)
+        context = {"request": request, "username": username, "data": data, "dataStock": dataStock}
+        return templates.TemplateResponse("stockDashboard.html", context)
+    except PyJWTError:
+        raise HTTPException(status_code=401, detail="Invalid token")
+    
+@app.get("/customizationDashboard")
+async def stockdashboard(request: Request, access_token: str = Cookie(default=None)):
+    try: 
+        print("satu")
+        if(access_token is None):
+            raise HTTPException(status_code=401, detail="Unauthorized")
+        print("dua")
+        payload = jwt.decode(access_token, SECRET_KEY, algorithms=[ALGORITHM])
+        print("tiga")
+        username: str = payload.get("sub")
+        print("empat")
+        dataStock = await getAllProductStock(token=access_token)
+        print("lima")
+        dataCustomization = await getMyCustomization(token=access_token)
+        print("enal")
+        context = {"request": request, "username": username, "dataCustomization": dataCustomization, "dataStock": dataStock}
+        print("tujuh")
+        return templates.TemplateResponse("customizationDashboard.html", context)
+    except PyJWTError:
+        print("sembilan")
+        raise HTTPException(status_code=401, detail="Invalid token")
+    

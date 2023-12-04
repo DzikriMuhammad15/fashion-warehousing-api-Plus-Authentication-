@@ -30,13 +30,13 @@
         <span class="text judul">Virtual Fashion Customization Style</span>
       </a>
       <ul class="side-menu top">
-        <li class="active">
-          <a href="#">
+        <li>
+          <a href="/dashboard">
             <span class="text">Product</span>
           </a>
         </li>
-        <li>
-          <a href="/categoryDashboard">
+        <li class="active">
+          <a href="#">
             <span class="text">Category</span>
           </a>
         </li>
@@ -84,31 +84,31 @@
             <h1>Welcome {{username}}</h1>
           </div>
         </div>
-        <!-- GET ALL PRODUCT -->
+        <!-- GET ALL CATEGORY -->
         <div class="table-data">
           <div class="order">
             <div class="head">
-              <h3>Get All Product</h3>
+              <h3>Get All Category</h3>
               <button
-                id="getAllProductExecute"
+                id="getAllCategoryExecute"
                 type="button"
                 class="btn btn-primary"
               >
                 Execute
               </button>
             </div>
-            <div id="getAllProduct"></div>
+            <div id="getAllCategory"></div>
           </div>
         </div>
-        <!-- GET ALL PRODUCT END-->
+        <!-- GET ALL CATEGORY END-->
 
-        <!-- GET PRODUCT BY ID -->
+        <!-- GET CATEGORY BY ID -->
         <div class="table-data">
           <div class="order">
             <div class="head">
-              <h3>Get Product By id</h3>
+              <h3>Get Category By id</h3>
               <button
-                id="getProductByIdExecute"
+                id="getCategoryByIdExecute"
                 type="button"
                 class="btn btn-primary"
               >
@@ -118,71 +118,47 @@
                 placeholder="input Product Id (with valid number)"
                 type="text"
                 class="form-control bg-dark text-light"
-                id="inputProductId"
+                id="inputCategoryId"
                 aria-describedby="emailHelp"
               />
             </div>
-            <div id="getProductById"></div>
+            <div id="getCategoryById"></div>
           </div>
         </div>
-        <!-- GET PRODUCT BY ID END -->
+        <!-- GET CATEGORY BY ID END -->
 
         <!-- POST PRODUCT -->
         <div class="table-data">
           <div class="order">
             <div class="head">
-              <h3>Post Product</h3>
+              <h3>Post Category</h3>
             </div>
             <form>
               <div class="mb-3">
-                <label for="productIdPost" class="form-label">Product Id</label>
+                <label for="productIdPost" class="form-label"
+                  >Category Id</label
+                >
                 <input
                   type="email"
                   class="form-control bg-dark text-light"
-                  id="productIdPost"
+                  id="categoryIdPost"
                   aria-describedby="emailHelp"
                 />
               </div>
               <div class="mb-3">
-                <label for="namePost" class="form-label">Name</label>
+                <label for="namePost" class="form-label">Category Name</label>
                 <input
                   type="text"
                   class="form-control bg-dark text-light"
                   id="namePost"
                 />
               </div>
-              <div class="mb-3">
-                <label for="pricePost" class="form-label">Price</label>
-                <input
-                  type="text"
-                  class="form-control bg-dark text-light"
-                  id="pricePost"
-                />
-              </div>
-              <div class="mb-3">
-                <label for="categoryIdPost" class="form-label"
-                  >Category Id</label
-                >
-                <input
-                  type="text"
-                  class="form-control bg-dark text-light"
-                  id="categoryIdPost"
-                />
-              </div>
-              <div class="mb-3">
-                <label for="linkPost" class="form-label">Link</label>
-                <input
-                  type="text"
-                  class="form-control bg-dark text-light"
-                  id="linkPost"
-                />
-              </div>
               <div class="mb-3 form-check"></div>
-              <button class="btn btn-primary" id="productSubmitPost">
+              <button class="btn btn-primary" id="categorySubmitPost">
                 Submit
               </button>
             </form>
-            <div id="productPost"></div>
+            <div id="categoryPost"></div>
           </div>
         </div>
         <!-- POST PRODUCT END -->
@@ -191,30 +167,26 @@
         <div class="table-data">
           <div class="order">
             <div class="head">
-              <h3>Delete Product</h3>
+              <h3>Delete Category</h3>
             </div>
-            <div id="getAllProduct">
+            <div id="getAllCategory">
               <table>
                 <thead>
                   <tr>
-                    <th>Name</th>
-                    <th>Price</th>
                     <th>Category Id</th>
-                    <th>Video Link</th>
+                    <th>Category Name</th>
                   </tr>
                 </thead>
                 <tbody>
                   {% for item in data %}
                   <tr>
-                    <td>{{item.name}}</td>
-                    <td>{{item.price}}</td>
                     <td>{{item.categoryId}}</td>
-                    <td>{{item.link}}</td>
+                    <td>{{item.categoryName}}</td>
                     <td>
                       <button
                         type="button"
-                        class="btn btn-danger deleteProductButton"
-                        data-id="{{item.idProduct}}"
+                        class="btn btn-danger deleteCategoryButton"
+                        data-id="{{item.categoryId}}"
                       >
                         Delete
                       </button>
@@ -223,7 +195,7 @@
                   {% endfor %}
                 </tbody>
               </table>
-              <div id="productDelete"></div>
+              <div id="categoryDelete"></div>
             </div>
           </div>
         </div>
@@ -233,30 +205,24 @@
         <div class="table-data">
           <div class="order">
             <div class="head">
-              <h3>Update Product</h3>
+              <h3>Update Category</h3>
             </div>
-            <div id="getAllProduct">
+            <div id="getAllCategory">
               <table>
                 <thead>
                   <tr>
-                    <th>Name</th>
-                    <th>Price</th>
-                    <th>Category Id</th>
-                    <th>Video Link</th>
+                    <th>Category Name</th>
                   </tr>
                 </thead>
                 <tbody>
                   {% for item in data %}
                   <tr>
-                    <td>{{item.name}}</td>
-                    <td>{{item.price}}</td>
-                    <td>{{item.categoryId}}</td>
-                    <td>{{item.link}}</td>
+                    <td>{{item.categoryName}}</td>
                     <td>
                       <button
                         type="button"
-                        class="btn btn-primary updateProductButton"
-                        data-id="{{item.idProduct}}"
+                        class="btn btn-primary updateCategoryButton"
+                        data-id="{{item.categoryId}}"
                       >
                         Update
                       </button>
@@ -272,59 +238,24 @@
       </main>
       <!-- MAIN -->
     </section>
-    <div class="modal fade" id="modalUpdateProduct" tabindex="-1">
+    <div class="modal fade" id="modalUpdateCategory" tabindex="-1">
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
-            <h1 class="modal-title fs-5" id="exampleModalLabel">
-              Update Product
-            </h1>
+            <h1 class="modal-title fs-5" id="exampleModalLabel">Create Debt</h1>
           </div>
           <div class="modal-body">
             <form>
               <div class="mb-3">
-                <label for="exampleInputEmail1" class="form-label">Name</label>
+                <label for="exampleInputEmail1" class="form-label"
+                  >Category Name</label
+                >
                 <input
                   type="text"
                   class="form-control"
                   id="nameUpdate"
                   aria-describedby="emailHelp"
                 />
-              </div>
-              <div class="email error"></div>
-
-              <div class="mb-3">
-                <label for="exampleInputEmail1" class="form-label">Price</label>
-                <input
-                  type="text"
-                  class="form-control"
-                  id="priceUpdate"
-                  aria-describedby="emailHelp"
-                />
-              </div>
-              <div class="amount error"></div>
-
-              <div class="mb-3">
-                <label for="exampleInputEmail1" class="form-label"
-                  >Category Id</label
-                >
-                <input
-                  type="text"
-                  class="form-control"
-                  id="categoryIdUpdate"
-                  aria-describedby="emailHelp"
-                />
-                <div class="description error"></div>
-              </div>
-              <div class="mb-3">
-                <label for="exampleInputEmail1" class="form-label">Link</label>
-                <input
-                  type="text"
-                  class="form-control"
-                  id="linkUpdate"
-                  aria-describedby="emailHelp"
-                />
-                <div class="description error"></div>
               </div>
             </form>
             <div id="updateContainer"></div>
@@ -340,7 +271,7 @@
             <button
               type="button"
               class="btn btn-primary"
-              id="updateProductFinal"
+              id="updateCategoryFinal"
             >
               Update
             </button>
@@ -391,6 +322,6 @@
       integrity="sha384-Rx+T1VzGupg4BHQYs2gCW9It+akI2MM/mndMCy36UVfodzcJcF0GGLxZIzObiEfa"
       crossorigin="anonymous"
     ></script>
-    <script src="/static/dashboardScript.js"></script>
+    <script src="/static/categoryScript.js"></script>
   </body>
 </html>

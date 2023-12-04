@@ -27,11 +27,13 @@
     <!-- SIDEBAR -->
     <section id="sidebar">
       <a href="#" class="brand">
-        <span class="text judul">Virtual Fashion Customization Style</span>
+        <span class="text judul mt-4 ms-lg-4"
+          >Virtual Fashion Customization Style</span
+        >
       </a>
       <ul class="side-menu top">
         <li class="active">
-          <a href="#">
+          <a href="/dashboard">
             <span class="text">Product</span>
           </a>
         </li>
@@ -41,12 +43,12 @@
           </a>
         </li>
         <li>
-          <a href="#">
+          <a href="/stockDashboard">
             <span class="text">Product Stock</span>
           </a>
         </li>
         <li>
-          <a href="#">
+          <a href="/customizationDashboard">
             <span class="text">My Customization</span>
           </a>
         </li>
@@ -84,110 +86,65 @@
             <h1>Welcome {{username}}</h1>
           </div>
         </div>
-        <!-- GET ALL PRODUCT -->
+        <!-- GET MY CUSTOMIZATION -->
         <div class="table-data">
           <div class="order">
             <div class="head">
-              <h3>Get All Product</h3>
+              <h3>Get My Customization</h3>
               <button
-                id="getAllProductExecute"
+                id="getMyCustomizationButton"
                 type="button"
                 class="btn btn-primary"
               >
                 Execute
               </button>
             </div>
-            <div id="getAllProduct"></div>
+            <div id="getMyCustomization"></div>
           </div>
         </div>
-        <!-- GET ALL PRODUCT END-->
+        <!-- GET MY CUSTOMIZATION END-->
 
-        <!-- GET PRODUCT BY ID -->
+        <!-- POST CUSTOMIZATION -->
         <div class="table-data">
           <div class="order">
             <div class="head">
-              <h3>Get Product By id</h3>
-              <button
-                id="getProductByIdExecute"
-                type="button"
-                class="btn btn-primary"
-              >
-                Execute
-              </button>
-              <input
-                placeholder="input Product Id (with valid number)"
-                type="text"
-                class="form-control bg-dark text-light"
-                id="inputProductId"
-                aria-describedby="emailHelp"
-              />
+              <h3>Update Product</h3>
             </div>
-            <div id="getProductById"></div>
+            <div id="getAllProduct">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Product Id</th>
+                    <th>stock</th>
+                    <th>Ukuran</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for item in dataStock %}
+                  <tr>
+                    <td>{{item.idProduct}}</td>
+                    <td>{{item.stock}}</td>
+                    <td>{{item.ukuran}}</td>
+                    <td>
+                      <button
+                        type="button"
+                        class="btn btn-primary postCustomizationButton"
+                        data-id="{{item.idProduct}}"
+                        data-size="{{item.ukuran}}"
+                      >
+                        Update
+                      </button>
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
-        <!-- GET PRODUCT BY ID END -->
+        <!-- POST CUSTOMIZATION END -->
 
-        <!-- POST PRODUCT -->
-        <div class="table-data">
-          <div class="order">
-            <div class="head">
-              <h3>Post Product</h3>
-            </div>
-            <form>
-              <div class="mb-3">
-                <label for="productIdPost" class="form-label">Product Id</label>
-                <input
-                  type="email"
-                  class="form-control bg-dark text-light"
-                  id="productIdPost"
-                  aria-describedby="emailHelp"
-                />
-              </div>
-              <div class="mb-3">
-                <label for="namePost" class="form-label">Name</label>
-                <input
-                  type="text"
-                  class="form-control bg-dark text-light"
-                  id="namePost"
-                />
-              </div>
-              <div class="mb-3">
-                <label for="pricePost" class="form-label">Price</label>
-                <input
-                  type="text"
-                  class="form-control bg-dark text-light"
-                  id="pricePost"
-                />
-              </div>
-              <div class="mb-3">
-                <label for="categoryIdPost" class="form-label"
-                  >Category Id</label
-                >
-                <input
-                  type="text"
-                  class="form-control bg-dark text-light"
-                  id="categoryIdPost"
-                />
-              </div>
-              <div class="mb-3">
-                <label for="linkPost" class="form-label">Link</label>
-                <input
-                  type="text"
-                  class="form-control bg-dark text-light"
-                  id="linkPost"
-                />
-              </div>
-              <div class="mb-3 form-check"></div>
-              <button class="btn btn-primary" id="productSubmitPost">
-                Submit
-              </button>
-            </form>
-            <div id="productPost"></div>
-          </div>
-        </div>
-        <!-- POST PRODUCT END -->
-
-        <!-- DELETE PRODUCT -->
+        <!-- DELETE CUSTOMIZATION -->
         <div class="table-data">
           <div class="order">
             <div class="head">
@@ -197,24 +154,31 @@
               <table>
                 <thead>
                   <tr>
-                    <th>Name</th>
-                    <th>Price</th>
-                    <th>Category Id</th>
-                    <th>Video Link</th>
+                    <th>Product Id</th>
+                    <th>Special Instructions</th>
+                    <th>Font</th>
+                    <th>Color</th>
+                    <th>Descriptions</th>
+                    <th>Size</th>
+                    <th>Image URL</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {% for item in data %}
+                  {% for item in dataCustomization %}
                   <tr>
-                    <td>{{item.name}}</td>
-                    <td>{{item.price}}</td>
-                    <td>{{item.categoryId}}</td>
-                    <td>{{item.link}}</td>
+                    <td>{{item.productId}}</td>
+                    <td>{{item.specialInstructions}}</td>
+                    <td>{{item.font}}</td>
+                    <td>{{item.color}}</td>
+                    <td>{{item.descriptions}}</td>
+                    <td>{{item.size}}</td>
+                    <td>{{item.imageUrl}}</td>
                     <td>
                       <button
                         type="button"
                         class="btn btn-danger deleteProductButton"
                         data-id="{{item.idProduct}}"
+                        data-size="{{item.ukuran}}"
                       >
                         Delete
                       </button>
@@ -227,7 +191,7 @@
             </div>
           </div>
         </div>
-        <!-- DELET END -->
+        <!-- DELETE CUSTOMIZATION END -->
 
         <!-- UPDATE PRODUCT -->
         <div class="table-data">
@@ -277,51 +241,75 @@
         <div class="modal-content">
           <div class="modal-header">
             <h1 class="modal-title fs-5" id="exampleModalLabel">
-              Update Product
+              Create Customization Request
             </h1>
           </div>
           <div class="modal-body">
             <form>
               <div class="mb-3">
-                <label for="exampleInputEmail1" class="form-label">Name</label>
+                <label for="exampleInputEmail1" class="form-label"
+                  >Special Instructions</label
+                >
                 <input
                   type="text"
                   class="form-control"
-                  id="nameUpdate"
+                  id="specialInstructionsUpdate"
                   aria-describedby="emailHelp"
                 />
               </div>
               <div class="email error"></div>
 
               <div class="mb-3">
-                <label for="exampleInputEmail1" class="form-label">Price</label>
+                <label for="exampleInputEmail1" class="form-label">Font</label>
                 <input
                   type="text"
                   class="form-control"
-                  id="priceUpdate"
+                  id="fontUpdate"
                   aria-describedby="emailHelp"
                 />
               </div>
               <div class="amount error"></div>
 
               <div class="mb-3">
-                <label for="exampleInputEmail1" class="form-label"
-                  >Category Id</label
-                >
+                <label for="exampleInputEmail1" class="form-label">Color</label>
                 <input
                   type="text"
                   class="form-control"
-                  id="categoryIdUpdate"
+                  id="colorUpdate"
                   aria-describedby="emailHelp"
                 />
                 <div class="description error"></div>
               </div>
               <div class="mb-3">
-                <label for="exampleInputEmail1" class="form-label">Link</label>
+                <label for="exampleInputEmail1" class="form-label"
+                  >Descriptions</label
+                >
                 <input
                   type="text"
                   class="form-control"
-                  id="linkUpdate"
+                  id="descriptionsUpdate"
+                  aria-describedby="emailHelp"
+                />
+                <div class="description error"></div>
+              </div>
+              <div class="mb-3">
+                <label for="exampleInputEmail1" class="form-label">Size</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="sizeUpdate"
+                  aria-describedby="emailHelp"
+                />
+                <div class="description error"></div>
+              </div>
+              <div class="mb-3">
+                <label for="exampleInputEmail1" class="form-label"
+                  >Image URL</label
+                >
+                <input
+                  type="text"
+                  class="form-control"
+                  id="imageURLUpdate"
                   aria-describedby="emailHelp"
                 />
                 <div class="description error"></div>
@@ -342,7 +330,7 @@
               class="btn btn-primary"
               id="updateProductFinal"
             >
-              Update
+              Create
             </button>
           </div>
         </div>
@@ -391,6 +379,6 @@
       integrity="sha384-Rx+T1VzGupg4BHQYs2gCW9It+akI2MM/mndMCy36UVfodzcJcF0GGLxZIzObiEfa"
       crossorigin="anonymous"
     ></script>
-    <script src="/static/dashboardScript.js"></script>
+    <script src="/static/customizationScript.js"></script>
   </body>
 </html>
