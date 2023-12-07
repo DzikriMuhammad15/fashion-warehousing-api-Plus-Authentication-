@@ -36,7 +36,7 @@ const updateTabelProduk = function (data, idContainer) {
             <th>Name</th>
             <th>Price</th>
             <th>Category Id</th>
-            <th>Video Link</th>
+            <th>Video</th>
           </tr>
         </thead>
         <tbody>`
@@ -55,8 +55,14 @@ const updateTabelProduk = function (data, idContainer) {
         ${el.categoryId}
         </td>
         <td>
-        ${el.link}
-        </td>
+                      <iframe
+                        width="560"
+                        height="315"
+                        src="${el.link}"
+                        frameborder="0"
+                        allowfullscreen
+                      ></iframe>
+                    </td>
       </tr>`
         })
         kumpulan = kumpulan + `
@@ -91,7 +97,7 @@ const updateTabelProdukSingle = function (data, idContainer) {
             <th>Name</th>
             <th>Price</th>
             <th>Category Id</th>
-            <th>Video Link</th>
+            <th>Video</th>
           </tr>
         </thead>
         <tbody>
@@ -109,8 +115,14 @@ const updateTabelProdukSingle = function (data, idContainer) {
         ${data.categoryId}
         </td>
         <td>
-        ${data.link}
-        </td>
+                      <iframe
+                        width="560"
+                        height="315"
+                        src="${data.link}"
+                        frameborder="0"
+                        allowfullscreen
+                      ></iframe>
+                    </td>
       </tr>
       </tbody>
       </table>`

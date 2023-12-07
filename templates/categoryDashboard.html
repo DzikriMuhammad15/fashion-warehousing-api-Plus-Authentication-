@@ -27,7 +27,9 @@
     <!-- SIDEBAR -->
     <section id="sidebar">
       <a href="#" class="brand">
-        <span class="text judul">Virtual Fashion Customization Style</span>
+        <span class="text judul mt-5 ms-lg-4"
+          >Virtual Fashion Customization Style</span
+        >
       </a>
       <ul class="side-menu top">
         <li>
@@ -36,17 +38,17 @@
           </a>
         </li>
         <li class="active">
-          <a href="#">
+          <a href="/categoryDashboard">
             <span class="text">Category</span>
           </a>
         </li>
         <li>
-          <a href="#">
+          <a href="/stockDashboard">
             <span class="text">Product Stock</span>
           </a>
         </li>
         <li>
-          <a href="#">
+          <a href="/customizationDashboard">
             <span class="text">My Customization</span>
           </a>
         </li>
@@ -81,7 +83,7 @@
       <main>
         <div class="head-title">
           <div class="left">
-            <h1>Welcome {{username}}</h1>
+            <h1>Welcome, {{username}}</h1>
           </div>
         </div>
         <!-- GET ALL CATEGORY -->
@@ -115,7 +117,7 @@
                 Execute
               </button>
               <input
-                placeholder="input Product Id (with valid number)"
+                placeholder="input Product Id"
                 type="text"
                 class="form-control bg-dark text-light"
                 id="inputCategoryId"
@@ -242,7 +244,9 @@
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
-            <h1 class="modal-title fs-5" id="exampleModalLabel">Create Debt</h1>
+            <h1 class="modal-title fs-5" id="exampleModalLabel">
+              Update Category
+            </h1>
           </div>
           <div class="modal-body">
             <form>

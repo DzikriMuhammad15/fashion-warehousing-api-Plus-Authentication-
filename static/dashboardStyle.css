@@ -556,7 +556,7 @@ body {
 }
 
 ::placeholder {
-  color: #ffffff !important; /* Warna putih dengan !important */
+  color: #808080 !important; /* Warna putih dengan !important */
   opacity: 1; /* Untuk memastikan warna tetap terlihat */
 }
 

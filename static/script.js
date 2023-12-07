@@ -134,6 +134,38 @@ document.addEventListener('DOMContentLoaded', function () {
                 console.log(err);
             }
         }
+        else {
+            try {
+                const res = await fetch("/createUAdmin", {
+                    method: "POST",
+                    body: JSON.stringify({ username, password }),
+                    headers: { "Content-Type": "application/json" },
+                });
+                const data = await res.json();
+                console.log(data);
+                if (data.detail) {
+                    errorEmail.textContent = data.detail;
+                }
+                else {
+                    // todo taro di local storage
+                    localStorage.setItem("token", data.access_token)
+                    const res = await fetch("/token", {
+                        method: "POST",
+                        body: JSON.stringify({ username, password }),
+                        headers: { "Content-Type": "application/json" },
+                    });
+                    const token = await res.json();
+                    // console.log(token.access_token);
+                    console.log((token));
+                    localStorage.setItem("token", token.access_token)
+                    location.assign("/dashboard")
+                }
+                // console.log(data);
+
+            } catch (err) {
+                console.log(err);
+            }
+        }
     });
 
 });

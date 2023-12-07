@@ -1,4 +1,5 @@
 const allSideMenu = document.querySelectorAll('#sidebar .side-menu.top li a');
+console.log("awalan");
 
 function longRunningOperation() {
     // Menampilkan overlay atau elemen pemuatan saat operasi dimulai
@@ -8,18 +9,19 @@ function longRunningOperation() {
     setTimeout(function () {
         // Selesai, menyembunyikan overlay atau elemen pemuatan
         document.getElementById('loading-overlay').style.display = 'none';
-    }, 8000); // Contoh: Menunggu 3 detik
+    }, 1400); // Contoh: Menunggu 3 detik
 }
 
 const updateTabelProduk = function (data, idContainer) {
     const dataContainer = document.getElementById(idContainer);
+    console.log("dalam");
     if (data.messages) {
         dataContainer.innerHTML = `<div class="alert alert-danger" role="alert">
             You dont have any customization request yet
             </div>`
     }
     else {
-
+        console.log("SS");
         if (data.detail) {
             const tipe = typeof data.detail;
             if (tipe == "string") {
@@ -39,14 +41,16 @@ const updateTabelProduk = function (data, idContainer) {
             let kumpulan = `<table>
         <thead>
         <tr>
-        <th>Customization Id</th>
-        <th>Product Id</th>
-        <th>Special Instructions</th>
-        <th>Font</th>
-        <th>Color</th>
-        <th>Descriptions</th>
-        <th>Price</th>
-        <th>Size</th>
+            <th>Customization Id</th>
+            <th>Product Id</th>
+            <th>Special Instructions</th>
+            <th>Font</th>
+            <th>Color</th>
+            <th>Descriptions</th>
+            <th>Price</th>
+            <th>Stock</th>
+            <th>Size</th>
+            <th>Image</th>
         </tr>
         </thead>
         <tbody>`
@@ -79,6 +83,9 @@ const updateTabelProduk = function (data, idContainer) {
         </td>
         <td>
         ${el.size}
+        </td>
+        <td>
+        <img src="${el.url}">
         </td>
         </tr>`
             })
@@ -118,7 +125,9 @@ const updateTabelProdukSingle = function (data, idContainer) {
             <th>Color</th>
             <th>Descriptions</th>
             <th>Price</th>
+            <th>Stock</th>
             <th>Size</th>
+            <th>Image</th>
           </tr>
         </thead>
         <tbody>
@@ -149,6 +158,9 @@ const updateTabelProdukSingle = function (data, idContainer) {
         </td>
         <td>
         ${data.size}
+        </td>
+        <td>
+        <img src="${data.url}">
         </td>
       </tr>
       </tbody>
@@ -261,10 +273,11 @@ switchMode.addEventListener('change', function () {
 })
 
 const getMyCustomization = document.getElementById("getMyCustomizationButton")
+console.log("ini");
 console.log(getMyCustomization);
 getMyCustomization.addEventListener("click", async function (e) {
-    e.preventDefault();
     longRunningOperation();
+    e.preventDefault();
     // todo hit api getAllProduct
     const url = "/Mycustomization"
     // ambil dulu token dari localstorage
@@ -278,8 +291,8 @@ getMyCustomization.addEventListener("click", async function (e) {
     }
     const result = await fetch(url, option);
     const data = await result.json()
-    console.log(data);
     updateTabelProduk(data, "getMyCustomization");
+    console.log(".");
     // todo ambil datanya dan ubah dulu menjadi json
     // todo jalankan fungsi updateTabelProduk
 })
@@ -344,7 +357,7 @@ if (postCustomizationButton.length > 0) {
                     returnLayar(dataHasil, "updateContainer");
                 }
                 else {
-                    location.assign("/dashboard");
+                    location.assign("/customizationDashboard");
                 }
             })
 
@@ -362,8 +375,8 @@ console.log("halo");
 if (deleteProductButton.length > 0) {
     for (let i = 0; i < deleteProductButton.length; i++) {
         deleteProductButton[i].addEventListener("click", async (e) => {
-            e.preventDefault();
             longRunningOperation();
+            e.preventDefault();
             const dataId = deleteProductButton[i].getAttribute("data-id");
             const url = `/product/${dataId}`;
             // ambil dulu token dari localstorage
@@ -460,3 +473,34 @@ logoutButton.addEventListener("click", () => {
         location.assign("/")
     })
 })
+
+const deleteRequestButton = document.querySelectorAll(".deleteCustomizationButton");
+console.log(deleteRequestButton);
+if (deleteRequestButton.length > 0) {
+    for (let i = 0; i < deleteRequestButton.length; i++) {
+        deleteRequestButton[i].addEventListener("click", async (e) => {
+            longRunningOperation();
+            e.preventDefault();
+            const id = deleteRequestButton[i].getAttribute("data-id");
+            const url = `/customization?idCustomization=${id}`;
+            // ambil dulu token dari localstorage
+            const token = localStorage.getItem("token")
+            const option = {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+            }
+            const result = await fetch(url, option);
+            const dataHasil = await result.json();
+            console.log(dataHasil);
+            if (!dataHasil.detail) {
+                location.assign("/customizationDashboard");
+            }
+            else {
+                returnLayar(dataHasil, "customizationDelete");
+            }
+        })
+    }
+}

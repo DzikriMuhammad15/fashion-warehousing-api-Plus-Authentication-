@@ -142,7 +142,7 @@ def get_current_user(token: str = Depends(oauth2_scheme)):
 
 
 
-url = 'http://localhost:8004/'
+url = 'https://customizedclothintegrated.salmonbeach-997612a6.australiaeast.azurecontainerapps.io/'
 
 def create_user_external(username, password):
     headers = {'Authorization': ''}
@@ -212,9 +212,10 @@ def login_for_access_token(response: Response, newUsers: User):
 
 
 @app.post("/createUAdmin")
-async def createAdmin(newUser: User):
+async def createAdmin(newUsers: User):
     # TODO LAKUKAN PENGECEKAN TERHADAP USERNAME
     foundUsername = False
+    newUser = newUsers.dict()
     for admin in user['users']:
         if(admin['username'] == newUser['username']):
             foundUsername = True
@@ -1169,7 +1170,7 @@ def createCustomizationRequests(specialInstructions, username, price, stock, fon
 	    )
 
 def getRequestByCustomerId(externalToken, customerId):
-    url = 'http://localhost:8004/'
+    url = 'https://customizedclothintegrated.salmonbeach-997612a6.australiaeast.azurecontainerapps.io/'
     headers = {'Authorization': f'Bearer {externalToken}'}
     hasil = []
     res = requests.get(url+f'customizationRequests/{customerId}', headers=headers).json()[0]
@@ -1186,7 +1187,8 @@ def getRequestByCustomerId(externalToken, customerId):
                 "price": product[2],
                 "stock": product[3],
                 "size": product[6],
-                "productType": product[7]
+                "productType": product[7],
+                "url": product[8]
             }
             hasil.append(inst)
         return hasil

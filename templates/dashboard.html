@@ -27,11 +27,13 @@
     <!-- SIDEBAR -->
     <section id="sidebar">
       <a href="#" class="brand">
-        <span class="text judul">Virtual Fashion Customization Style</span>
+        <span class="text judul mt-5 ms-lg-4"
+          >Virtual Fashion Customization Style</span
+        >
       </a>
       <ul class="side-menu top">
         <li class="active">
-          <a href="#">
+          <a href="/dashboard">
             <span class="text">Product</span>
           </a>
         </li>
@@ -41,12 +43,12 @@
           </a>
         </li>
         <li>
-          <a href="#">
+          <a href="/stockDashboard">
             <span class="text">Product Stock</span>
           </a>
         </li>
         <li>
-          <a href="#">
+          <a href="/customizationDashboard">
             <span class="text">My Customization</span>
           </a>
         </li>
@@ -81,7 +83,7 @@
       <main>
         <div class="head-title">
           <div class="left">
-            <h1>Welcome {{username}}</h1>
+            <h1>Welcome, {{username}}</h1>
           </div>
         </div>
         <!-- GET ALL PRODUCT -->
@@ -115,7 +117,7 @@
                 Execute
               </button>
               <input
-                placeholder="input Product Id (with valid number)"
+                placeholder="input Product Id"
                 type="text"
                 class="form-control bg-dark text-light"
                 id="inputProductId"
@@ -170,7 +172,9 @@
                 />
               </div>
               <div class="mb-3">
-                <label for="linkPost" class="form-label">Link</label>
+                <label for="linkPost" class="form-label"
+                  >Video Link (Use Embed Link)</label
+                >
                 <input
                   type="text"
                   class="form-control bg-dark text-light"
@@ -200,7 +204,7 @@
                     <th>Name</th>
                     <th>Price</th>
                     <th>Category Id</th>
-                    <th>Video Link</th>
+                    <th>Video</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -209,7 +213,15 @@
                     <td>{{item.name}}</td>
                     <td>{{item.price}}</td>
                     <td>{{item.categoryId}}</td>
-                    <td>{{item.link}}</td>
+                    <td>
+                      <iframe
+                        width="560"
+                        height="315"
+                        src="{{item.link}}"
+                        frameborder="0"
+                        allowfullscreen
+                      ></iframe>
+                    </td>
                     <td>
                       <button
                         type="button"
@@ -242,7 +254,7 @@
                     <th>Name</th>
                     <th>Price</th>
                     <th>Category Id</th>
-                    <th>Video Link</th>
+                    <th>Video</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -251,7 +263,15 @@
                     <td>{{item.name}}</td>
                     <td>{{item.price}}</td>
                     <td>{{item.categoryId}}</td>
-                    <td>{{item.link}}</td>
+                    <td>
+                      <iframe
+                        width="560"
+                        height="315"
+                        src="{{item.link}}"
+                        frameborder="0"
+                        allowfullscreen
+                      ></iframe>
+                    </td>
                     <td>
                       <button
                         type="button"
